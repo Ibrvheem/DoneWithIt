@@ -58,7 +58,7 @@ const messages = [
 
   // ...
 ];
-function SelfCare() {
+function TherapistChat({navigation}) {
   
   return (
   <KeyboardAwareScrollView>
@@ -69,8 +69,13 @@ function SelfCare() {
         <View style = {styles.body}>
           <SafeAreaView>
             <View style = {{display:'flex', flexDirection:'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 30, height: 60}}>
-              <View style = {{display: 'flex',flexDirection:'row', alignItems:'center', gap: 8}}>
+              <View style = {{display: 'flex',flexDirection:'row', alignItems:'center', gap: 8}}> 
+                <TouchableOpacity style = {{display: 'flex',flexDirection:'row', alignItems:'center', gap: 8}} onPress={()=>{
+                  navigation.navigate('Bottombar')
+                }}>
+                  <Image source = {require('../assets/Icons/back.png')} style = {{height: 20, width: 20, borderRadius: 30}}/>
                   <Image source = {require('../assets/Images/Profile-photo.jpg')} style = {{height: 40, width: 40, borderRadius: 30}}/>
+                </TouchableOpacity>
                   <Text style = {[styles.mediumText]}>Dr. Aisha Auwal</Text>
               </View>
               <TouchableOpacity>
@@ -135,4 +140,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default SelfCare
+export default TherapistChat
