@@ -1,44 +1,59 @@
 import { faFontAwesome } from "@fortawesome/free-regular-svg-icons"
 import { useState } from "react"
-import { View,StyleSheet, Text, SafeAreaView, TextInput, Button, TouchableOpacity, Image } from "react-native"
+import { Modal, View,StyleSheet, Text, SafeAreaView, TextInput, Button, TouchableOpacity, Image } from "react-native"
 import { CheckBox, Divider } from "react-native-elements"
+import Config from 'react-native-config';
 function SignUp({navigation}) {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [phone, setPhone] = useState('')
-    const [password, setPassword] = useState('')
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [password, setPassword] = useState('');
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    
+    const api = "https://api.mypal.itcentral.ng"
+
+    // console.log(api);
     
 
     function handleSignUp(){
-        fetch ('http://192.168.0.162:5551/register', {
+        fetch (`${api}/register`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(
-                {
-                    full_name: name,
-                    phone: phone,
-                    email: email,
-                    password:password
-                }
+                { name, phone, email, password }
             )
         })
         .then(response => response.json())
-        .then(data => console.log(data))
-        console.log('sent')
+        .then(data => {
+            
+            setIsModalVisible(true)
+            setModalMessage(data.message)
+        })
 
     }
 
   return (
     <View style = {styles.all}>
+        <Modal visible={isModalVisible} animationType="slide">
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', height:'50%' }}>
+            <Text 
+            style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}
+            >{modalMessage}</Text>
+            <TouchableOpacity onPress={()=>setIsModalVisible(false)}>
+                <Text>Continue</Text>
+            </TouchableOpacity>
+            </View>
+        </Modal>
         <SafeAreaView style = {styles.container}>
             <View style = {styles.body}>
                 <View style = {styles.signup}>
                     <View style = {{display:'flex', flexDirection: 'row', alignItems: 'center', gap:5}}>
                         <Image source={require('../assets/favicon.png')}/>
-                        <Text style = {styles.greetings}>Hey,there, I'm Max. Before we proceed,Fill in your info </Text>
+                        <Text style = {styles.greetings}>Hey,there, Please fill in your info </Text>
                         {/* <Text style = {[styles.inputnames, {textAlign: 'center', fontWeight:'bold'}]}>Connect with your friends today!</Text>  */}
 
                     </View>
@@ -82,7 +97,7 @@ function SignUp({navigation}) {
                 </View>
             </View>
         </View>
-    </SafeAreaView>
+        </SafeAreaView>
 
 </View>
 

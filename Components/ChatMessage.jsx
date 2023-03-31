@@ -3,15 +3,29 @@ import { View, Text, StyleSheet, Image } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 
 const ChatMessage = ({ message }) => {
+
+  function formatTime(datetimeString) {
+    const date = new Date(datetimeString);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  
+    const formattedTime = `${formattedHours}:${formattedMinutes}${ampm}`;
+    return formattedTime;
+  }
+  
+
   return (
-    <View style = {{display: 'flex', flexDirection: message.sender == 'You'? 'row-reverse' : 'row', gap: 5, width: '100%'}}>
+    <View style = {{display: 'flex', flexDirection: message.role == 'user'? 'row-reverse' : 'row', gap: 5, width: '100%'}}>
         <Image style = {{backgroundColor: 'transparent', height: 40, width: 40, borderRadius:50}} source={require('../assets/Images/Profile-photo.jpg' )}/>
-    <View style={[styles.container,{backgroundColor: message.sender == 'You'? '#ADD8E6': '#D3E8D3', flexDirection: message.sender == 'You'? 'row-reverse': 'row', borderBottomRightRadius: message.sender == 'You'? 0:null, borderBottomLeftRadius: message.sender == 'My pal'? 0:null }]}>
+    <View style={[styles.container,{backgroundColor: message.role == 'user'? '#ADD8E6': '#D3E8D3', flexDirection: message.role == 'user'? 'row-reverse': 'row', borderBottomRightRadius: message.role == 'user'? 0:null, borderBottomLeftRadius: message.role == 'assistant'? 0:null }]}>
         <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
         </View>
-      <View style = {{ width: '100%',display: 'flex', justifyContent: 'center', alignItems: message.sender == 'You'? 'flex-end' : 'flex-start'}}> 
+      <View style = {{ width: '100%',display: 'flex', justifyContent: 'center', alignItems: message.role == 'user'? 'flex-end' : 'flex-start'}}> 
           <Text style={styles.content}>{message.content}</Text>
-          <Text style={styles.timestamp}>{message.timestamp}</Text>
+          <Text style={styles.timestamp}>{formatTime(message.created_at)}</Text>
 
       </View>
 

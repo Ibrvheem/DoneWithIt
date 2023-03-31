@@ -7,82 +7,86 @@ import Bottombar from './Bottombar'
 
 
 function Home({navigation}) {
-
-  const spaces = [
-    {
-      Title: "Mindful Meditation",
-      Description: "A guided meditation session to help you calm your mind and reduce stress.",
-      Host: "Jane Doe"
-    },
-    {
-      Title: "Therapy Talk",
-      Description: "A safe and supportive space to discuss your mental health concerns with a licensed therapist.",
-      Host: "John Smith"
-    },
-    {
-      Title: "Yoga for Mental Health",
-      Description: "A gentle yoga practice focused on improving your mental health and wellbeing.",
-      Host: "Emily Jones"
-    },
-    {
-      Title: "Art Therapy Workshop",
-      Description: "An expressive arts workshop designed to help you process and cope with emotions.",
-      Host: "Sarah Lee"
-    },
-    {
-      Title: "Support Group for Anxiety",
-      Description: "A weekly support group for individuals struggling with anxiety and related issues.",
-      Host: "David Kim"
-    }
-  ];
-
-  // const upcomingSpaces = [
-  //   {
-  //     Title: "Stress Management Workshop",
-  //     Description: "Learn practical techniques to manage stress and improve your mental wellbeing.",
-  //     Host: "Karen Wong",
-  //     Date: "2023-04-10",
-  //     Time: "3:00 PM EST"
-  //   },
-  //   {
-  //     Title: "Mindfulness for Anxiety",
-  //     Description: "Explore mindfulness practices to alleviate anxiety and increase self-awareness.",
-  //     Host: "Alex Chen",
-  //     Date: "2023-04-12",
-  //     Time: "6:00 PM EST"
-  //   },
-  //   {
-  //     Title: "Mental Health Check-In",
-  //     Description: "Join a supportive community and share your mental health journey with others.",
-  //     Host: "Jessica Lee",
-  //     Date: "2023-04-15",
-  //     Time: "2:00 PM EST"
-  //   },
-  //   {
-  //     Title: "Coping with Depression",
-  //     Description: "Gain insight into depression and learn coping strategies to improve your mood.",
-  //     Host: "Michael Kim",
-  //     Date: "2023-04-18",
-  //     Time: "7:00 PM EST"
-  //   },
-  //   {
-  //     Title: "Building Resilience",
-  //     Description: "Develop resilience and improve your ability to bounce back from life's challenges.",
-  //     Host: "Samantha Lee",
-  //     Date: "2023-04-20",
-  //     Time: "4:00 PM EST"
-  //   }
-  // ];
-  
-  
+  const [activeSpaces, setActivespaces] = useState([])
   const [speakRequest, setSpeakRequest] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [upcomingSpaces, setUpcomingspaces] = useState([])
+  const [user, setUser] = useState({})
+  const [token, setToken] = useState("")
+
+  const api = "https://api.mypal.itcentral.ng";
+
+  const  formatDate = (dateString) =>{
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(date);
+    const year = date.getFullYear();
+  
+    const suffix = (() => {
+      if (day === 1 || day === 21 || day === 31) {
+        return 'st';
+      } else if (day === 2 || day === 22) {
+        return 'nd';
+      } else if (day === 3 || day === 23) {
+        return 'rd';
+      } else {
+        return 'th';
+      }
+    })();
+  
+    const formattedDate = `${day}${suffix} ${month}, ${year}`;
+    return formattedDate;
+  }
+
+  const formatTime = (datetimeString) =>{
+    const date = new Date(datetimeString);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  
+    const formattedTime = `${formattedHours}:${formattedMinutes}${ampm}`;
+    return formattedTime;
+  }
+  
+  
+
   useEffect(()=>{
-    fetch('http://192.168.0.162:5551/spaces')
+    AsyncStorage.getItem('user')
+      .then(user => setUser(JSON.parse(user)))
+  },[])
+
+  useEffect(()=>{
+    AsyncStorage.getItem('token')
+      .then(token => {
+        setToken(token);
+        // fetch active spaces
+  fetch(`${api}/spaces`, {
+    method: 'GET',
+    headers: {
+        'Authorization': `Bearer ${token}`
+    },
+  })
+    .then(response => response.json())
+      .then(data => setActivespaces(data.spaces))
+
+  // fetch upcoming spaces
+    fetch(`${api}/spaces?filter=upcoming`, {
+      method: 'GET',
+      headers: {
+          'Authorization': `Bearer ${token}`
+      },
+    }
+    
+)
       .then(response => response.json())
         .then(data => setUpcomingspaces(data.spaces))
+      }
+        )
   },[])
+
+
   return (
     <>
     
@@ -92,8 +96,8 @@ function Home({navigation}) {
           
           <View style = {{display:'flex', flexDirection:'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 30}}>
             <View>
-              <Text style = {styles.extraSmallText}>Good Morning!</Text>
-              <Text style = {[styles.mediumText, {opacity: .5}]}>Rasheedat Jamiu</Text>
+              <Text style = {styles.extraSmallText}>Hello!</Text>
+              <Text style = {[styles.mediumText, {opacity: .5}]}>{user?.name}</Text>
             </View>
             <View>
                 <Image source = {require('../assets/Images/Profile-photo.jpg')} style = {{height: 50, width: 50, borderRadius: 30}}/>
@@ -105,14 +109,15 @@ function Home({navigation}) {
             </View>
             <ScrollView horizontal = {true} showsHorizontalScrollIndicator = {false} >
                 {
-                  spaces.map((space)=>{
+                  !activeSpaces? <Text style = {[styles.mediumText, {opacity: .5}]}>No active spaces</Text>:
+                  activeSpaces?.map((space)=>{
                     return(
                       <TouchableOpacity style = {styles.communityCardNow} onPress = { ()=>{
                         setModalVisible(!modalVisible)
                       }}>
-                        <Text style = {[styles.mediumText, {opacity: 1}]}>{space.Title}</Text>
-                        <Text style = {[styles.extraSmallText, {opacity: 1}]}>{space.Description}</Text>
-                        <Text style = {[styles.extraSmallText, {opacity: .5}]}>Host: {space.Host}</Text>
+                        <Text style = {[styles.mediumText, {opacity: 1}]}>{space.name}</Text>
+                        <Text style = {[styles.extraSmallText, {opacity: 1}]}>{space.description}</Text>
+                        <Text style = {[styles.extraSmallText, {opacity: .5}]}>Host: {space.host?.name}</Text>
                         <Pressable onPress = { ()=>{
                         setModalVisible(!modalVisible)
                       }} style = {{backgroundColor: '#f5f5f5',height: 'auto', width:90, paddingVertical: 10, paddingHorizontal: 10, display: 'flex', alignItems: 'center', justifyContent:'center', borderRadius: 12}}>
@@ -131,21 +136,21 @@ function Home({navigation}) {
             </View>
             <ScrollView vertical = {true} showsVerticalScrollIndicator = {false} >
               {
-                upcomingSpaces.map((upcomingSpace)=>{
-                  return(
+                !upcomingSpaces? <Text style = {[styles.mediumText, {opacity: .5}]}>No upcoming spaces</Text>:
+                upcomingSpaces?.map((space)=>
                     <TouchableOpacity style = {styles.communityCardLater}>
-                        <Text style = {[styles.mediumText, {opacity: 1}]}>{upcomingSpace.title}</Text>
-                        <Text style = {[styles.extraSmallText, {opacity: 1}]}>{upcomingSpace.description}</Text>
+                        <Text style = {[styles.mediumText, {opacity: 1}]}>{space.name}</Text>
+                        <Text style = {[styles.extraSmallText, {opacity: 1}]}>{space.description}</Text>
                         <View>
-                          <Text style = {[styles.extraSmallText, {opacity: .5}]}>Host:{upcomingSpace.host_id}</Text>
+                          <Text style = {[styles.extraSmallText, {opacity: .5}]}>Host:{space.host?.name}</Text>
                           <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 30, marginTop:10}}>
                             <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <Image source={require('../assets/Icons/time.png')} style = {{height:15, width: 15}}/>
-                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {upcomingSpace.time}</Text>
+                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {formatTime(space.time)}</Text>
                             </View>
                             <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <Image source={require('../assets/Icons/calendar.png')} style = {{height:15, width: 15}}/>
-                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {upcomingSpace.date}</Text>
+                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {formatDate(space.date)}</Text>
                             </View>
 
                           </View>
@@ -157,8 +162,6 @@ function Home({navigation}) {
                         </Pressable>
                     </TouchableOpacity>
                   )
-
-                })
               }
             </ScrollView>
 

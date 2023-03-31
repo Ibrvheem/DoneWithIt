@@ -1,16 +1,27 @@
 import { faFontAwesome } from "@fortawesome/free-regular-svg-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { View,StyleSheet, Text, SafeAreaView, TextInput, Button, TouchableOpacity, Image } from "react-native"
 import { CheckBox, Divider } from "react-native-elements"
+
 function Signin({navigation}) {
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] =  useState(false)
-    const api = process.env.REACT_APP_API_URL
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] =  useState(false);
+    const api = "https://api.mypal.itcentral.ng"
+
+    // console.log(api);
+
+    useEffect(() => {
+        AsyncStorage.getItem('token').then(token => {
+            if(token){
+                navigation.navigate('Bottombar')
+            }
+        })
+    }, [])
 
      function handleSignIn(){
-        fetch ('http://192.168.0.162:5551/auth', {
+        fetch (`${api}/login`, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -18,29 +29,30 @@ function Signin({navigation}) {
             },
             body: JSON.stringify(
                 {
-                    username: username,
-                    password:password
+                    email,
+                    password
                 }
             )
         })
         .then(response => {
-            if (response.status === 200){
-                navigation.navigate('Bottombar')
-                setError(false)
-            }else if (response.status === 401){
-                console.log('there is an error')
+            // console.log(response)
+            if(response.status === 200){
+                response.json().then(data => {
+                    // console.log(data)
+                    AsyncStorage.setItem('token', data.token)
+                    AsyncStorage.setItem('user', JSON.stringify(data.user))
+                    navigation.navigate('Bottombar')
+                })
+            }else{
                 setError(true)
             }
         })
-        // .then(response => response.json())
-        .then(data => console.log(data))
-        
 
 
     }
 
-    const userName = ['Ibrahim']
-    AsyncStorage.setItem('username', username)
+    // const userName = ['Ibrahim']
+    // AsyncStorage.setItem('username', username)
 
 
 
@@ -51,14 +63,14 @@ function Signin({navigation}) {
         <View style = {styles.body}>
             <View style = {styles.signin}>
                 <View>
-                    <Text style = {styles.greetings}>Hi, Welcome Back <Image source={require('../assets/Icons/wave.png')} style = {{height:30, width: 30}}/></Text>
+                    <Text style = {styles.greetings}>Hi, Welcome <Image source={require('../assets/Icons/wave.png')} style = {{height:30, width: 30}}/></Text>
 
                 </View>
             <View>
                 <View style = {styles.form}>
                     <Text style = {styles.inputnames}>Email</Text> 
-                    <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255,.6)' placeholder="Example@gmail.com" value={username} onChangeText={(text) =>{
-                        setUsername(text)
+                    <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255,.6)' placeholder="Example@gmail.com" value={email} onChangeText={(text) =>{
+                        setEmail(text)
 
                     }}/>
                 </View>
