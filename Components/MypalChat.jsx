@@ -57,7 +57,7 @@ function MypalChat({navigation}) {
       if(response.status === 201){
         response.json().then(data => {
           setMessages([...messages, data.chat])
-          seMessage('')
+          seMessage({role: 'user', content: '', created_at: new Date()})
         })
       }else{
         // setError(true)
