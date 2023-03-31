@@ -1,8 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Surface } from '@react-native-material/core'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Image, ImageBackground, Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 import { SafeAreaView, Text, View } from 'react-native'
 import Bottombar from './Bottombar'
+
 
 function Home({navigation}) {
 
@@ -34,46 +36,53 @@ function Home({navigation}) {
     }
   ];
 
-  const upcomingSpaces = [
-    {
-      Title: "Stress Management Workshop",
-      Description: "Learn practical techniques to manage stress and improve your mental wellbeing.",
-      Host: "Karen Wong",
-      Date: "2023-04-10",
-      Time: "3:00 PM EST"
-    },
-    {
-      Title: "Mindfulness for Anxiety",
-      Description: "Explore mindfulness practices to alleviate anxiety and increase self-awareness.",
-      Host: "Alex Chen",
-      Date: "2023-04-12",
-      Time: "6:00 PM EST"
-    },
-    {
-      Title: "Mental Health Check-In",
-      Description: "Join a supportive community and share your mental health journey with others.",
-      Host: "Jessica Lee",
-      Date: "2023-04-15",
-      Time: "2:00 PM EST"
-    },
-    {
-      Title: "Coping with Depression",
-      Description: "Gain insight into depression and learn coping strategies to improve your mood.",
-      Host: "Michael Kim",
-      Date: "2023-04-18",
-      Time: "7:00 PM EST"
-    },
-    {
-      Title: "Building Resilience",
-      Description: "Develop resilience and improve your ability to bounce back from life's challenges.",
-      Host: "Samantha Lee",
-      Date: "2023-04-20",
-      Time: "4:00 PM EST"
-    }
-  ];
+  // const upcomingSpaces = [
+  //   {
+  //     Title: "Stress Management Workshop",
+  //     Description: "Learn practical techniques to manage stress and improve your mental wellbeing.",
+  //     Host: "Karen Wong",
+  //     Date: "2023-04-10",
+  //     Time: "3:00 PM EST"
+  //   },
+  //   {
+  //     Title: "Mindfulness for Anxiety",
+  //     Description: "Explore mindfulness practices to alleviate anxiety and increase self-awareness.",
+  //     Host: "Alex Chen",
+  //     Date: "2023-04-12",
+  //     Time: "6:00 PM EST"
+  //   },
+  //   {
+  //     Title: "Mental Health Check-In",
+  //     Description: "Join a supportive community and share your mental health journey with others.",
+  //     Host: "Jessica Lee",
+  //     Date: "2023-04-15",
+  //     Time: "2:00 PM EST"
+  //   },
+  //   {
+  //     Title: "Coping with Depression",
+  //     Description: "Gain insight into depression and learn coping strategies to improve your mood.",
+  //     Host: "Michael Kim",
+  //     Date: "2023-04-18",
+  //     Time: "7:00 PM EST"
+  //   },
+  //   {
+  //     Title: "Building Resilience",
+  //     Description: "Develop resilience and improve your ability to bounce back from life's challenges.",
+  //     Host: "Samantha Lee",
+  //     Date: "2023-04-20",
+  //     Time: "4:00 PM EST"
+  //   }
+  // ];
   
   
+  const [speakRequest, setSpeakRequest] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [upcomingSpaces, setUpcomingspaces] = useState([])
+  useEffect(()=>{
+    fetch('http://192.168.0.162:5551/spaces')
+      .then(response => response.json())
+        .then(data => setUpcomingspaces(data.spaces))
+  },[])
   return (
     <>
     
@@ -125,18 +134,18 @@ function Home({navigation}) {
                 upcomingSpaces.map((upcomingSpace)=>{
                   return(
                     <TouchableOpacity style = {styles.communityCardLater}>
-                        <Text style = {[styles.mediumText, {opacity: 1}]}>{upcomingSpace.Title}</Text>
-                        <Text style = {[styles.extraSmallText, {opacity: 1}]}>{upcomingSpace.Description}</Text>
+                        <Text style = {[styles.mediumText, {opacity: 1}]}>{upcomingSpace.title}</Text>
+                        <Text style = {[styles.extraSmallText, {opacity: 1}]}>{upcomingSpace.description}</Text>
                         <View>
-                          <Text style = {[styles.extraSmallText, {opacity: .5}]}>Host:{upcomingSpace.Host}</Text>
+                          <Text style = {[styles.extraSmallText, {opacity: .5}]}>Host:{upcomingSpace.host_id}</Text>
                           <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 30, marginTop:10}}>
                             <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <Image source={require('../assets/Icons/time.png')} style = {{height:15, width: 15}}/>
-                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {upcomingSpace.Time}</Text>
+                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {upcomingSpace.time}</Text>
                             </View>
                             <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <Image source={require('../assets/Icons/calendar.png')} style = {{height:15, width: 15}}/>
-                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {upcomingSpace.Date}</Text>
+                            <Text style = {[styles.extraSmallText, {fontSize: 15}]}> : {upcomingSpace.date}</Text>
                             </View>
 
                           </View>
@@ -166,7 +175,11 @@ function Home({navigation}) {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
           <Image source={require('../assets/Icons/sound-bars.png')} style = {{height:'50%', width: '50%', objectFit: 'contain'}}/>
-
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setSpeakRequest(!speakRequest)}>
+              <Text style={styles.textStyle}>{speakRequest? 'Request to speak': 'Requested'}</Text>
+            </Pressable>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => setModalVisible(!modalVisible)}>

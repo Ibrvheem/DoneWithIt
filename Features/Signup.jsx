@@ -1,7 +1,36 @@
 import { faFontAwesome } from "@fortawesome/free-regular-svg-icons"
+import { useState } from "react"
 import { View,StyleSheet, Text, SafeAreaView, TextInput, Button, TouchableOpacity, Image } from "react-native"
 import { CheckBox, Divider } from "react-native-elements"
 function SignUp({navigation}) {
+    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
+    const [phone, setPhone] = useState('')
+    const [password, setPassword] = useState('')
+    
+
+    function handleSignUp(){
+        fetch ('http://192.168.0.162:5551/register', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                {
+                    full_name: name,
+                    phone: phone,
+                    email: email,
+                    password:password
+                }
+            )
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        console.log('sent')
+
+    }
+
   return (
     <View style = {styles.all}>
         <SafeAreaView style = {styles.container}>
@@ -15,28 +44,26 @@ function SignUp({navigation}) {
                     </View>
                 <View>
                     <View style = {styles.form}>
-                        <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Enter Your Username"/>
+                        <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Full Name" value = {name} onChangeText={(text)=>{
+                            setName(text)
+                        }}/>
                     </View>
                     <View style = {styles.form}>
-                        <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Enter Your Email"/>
+                        <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Enter Your Email" value = {email} onChangeText={(text)=>{
+                            setEmail(text)
+                        }}/>
                     </View>
                     <View style = {styles.form}>
-                        <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Enter Your Phone Number"/>
+                        <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Enter Your Phone Number" value = {phone} onChangeText={(text)=>{
+                            setPhone(text)
+                        }}/>
                     </View>
                     <View style = {styles.form}>
-                        <TextInput style = {styles.input} secureTextEntry placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Enter Your Password"/>
+                        <TextInput style = {styles.input} secureTextEntry placeholderTextColor = 'rgba(255,255,255, .6)' placeholder="Enter Your Password" value = {password} onChangeText={(text)=>{
+                            setPassword(text)
+                        }}/>
                     </View>
-                    {/* <View style = {{display: 'flex', flexDirection: 'row', alignItems:'center', justifyContent: 'space-between'}}>
-                        <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                            <CheckBox containerStyle = {{padding:0, margin:0, marginLeft:0, marginRight: 1}}/>
-                            <Text style = {{color: 'black', fontSize: 15, fontWeight: 'bold'}}>Remember Me?</Text>
-
-                        </View>
-                        <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                            <Text style = {{color: '#E86969', fontSize: 15, fontWeight: 'medium'}}>Forgot Password?</Text>
-                        </View>
-                    </View> */}
-                    <TouchableOpacity style = {styles.button}>
+                    <TouchableOpacity style = {styles.button} onPress = {handleSignUp}>
                         <Text style = {{color: '#fff', fontSize:16, fontWeight: 'bold'}}>Sign Up</Text>
                     </TouchableOpacity>
                 </View>
@@ -46,25 +73,18 @@ function SignUp({navigation}) {
                     <Divider style ={{flex: 1}}/>
                 </View>
                 <View>
-                        {/* <TouchableOpacity style = {[styles.button, {backgroundColor: '#1877F2'}]}>
-                            <Image source = {require('../assets/Icons/Facebook.png')} style= {[styles.icon]}/>
-                            <Text style = {{color: '#fff', fontSize: 16, fontWeight: 'bold'}}>  Signup With Facebook</Text>
-                            <View></View>
-                    
-                        </TouchableOpacity> */}
-                        <TouchableOpacity style = {[styles.button, {backgroundColor: 'transparent',borderWidth: 1, borderColor: 'white'}]}>
+                    <TouchableOpacity style = {[styles.button, {backgroundColor: 'transparent',borderWidth: 1, borderColor: 'white'}]}>
                         <Image source = {require('../assets/Icons/Google.png')} style= {[styles.icon]}/>
                             <Text style = {{color: 'white', fontSize: 16, fontWeight: 'bold'}}>Signup with Google</Text>
-                            <View></View>
-                        </TouchableOpacity>
+                    </TouchableOpacity>
                         <Text style = {{fontSize: 16, color: 'white', fontWeight: "bold", textAlign:'center', marginTop: 20}}>Already have an account? <Text style = {{color:'#2F89FC', textDecorationLine:"underline"}} onPress = {()=>{
                             navigation.navigate('signin')}}>Login</Text></Text>
-                    </View>
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
+    </SafeAreaView>
 
-    </View>
+</View>
 
   )
 }
@@ -116,7 +136,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginBottom: 28,
         borderColor: 'rgba(255,255,255,1)',
-        fontFamily: 'poppinsRegular'
+        fontFamily: 'poppinsRegular',
+        color:'white'
 
     },
     button:{

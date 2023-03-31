@@ -1,7 +1,50 @@
 import { faFontAwesome } from "@fortawesome/free-regular-svg-icons"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useState } from "react"
 import { View,StyleSheet, Text, SafeAreaView, TextInput, Button, TouchableOpacity, Image } from "react-native"
 import { CheckBox, Divider } from "react-native-elements"
 function Signin({navigation}) {
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+    const [error, setError] =  useState(false)
+    const api = process.env.REACT_APP_API_URL
+
+     function handleSignIn(){
+        fetch ('http://192.168.0.162:5551/auth', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                {
+                    username: username,
+                    password:password
+                }
+            )
+        })
+        .then(response => {
+            if (response.status === 200){
+                navigation.navigate('Bottombar')
+                setError(false)
+            }else if (response.status === 401){
+                console.log('there is an error')
+                setError(true)
+            }
+        })
+        // .then(response => response.json())
+        .then(data => console.log(data))
+        
+
+
+    }
+
+    const userName = ['Ibrahim']
+    AsyncStorage.setItem('username', username)
+
+
+
+    
   return (
     <View style = {styles.all}>
         <SafeAreaView style = {styles.container}>
@@ -14,11 +57,16 @@ function Signin({navigation}) {
             <View>
                 <View style = {styles.form}>
                     <Text style = {styles.inputnames}>Email</Text> 
-                    <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255,.6)' placeholder="Example@gmail.com"/>
+                    <TextInput style = {styles.input} placeholderTextColor = 'rgba(255,255,255,.6)' placeholder="Example@gmail.com" value={username} onChangeText={(text) =>{
+                        setUsername(text)
+
+                    }}/>
                 </View>
                 <View style = {styles.form}>
                     <Text style = {styles.inputnames}>Password</Text>
-                    <TextInput style = {styles.input} secureTextEntry placeholderTextColor = 'rgba(255,255,255,.6)' placeholder="Enter Your Password"/>
+                    <TextInput style = {styles.input} secureTextEntry placeholderTextColor = 'rgba(255,255,255,.6)' value = {password}  onChangeText = {(text)=>{
+                        setPassword(text)
+                    }}placeholder="Enter Your Password"/>
                 </View>
                 <View style = {{display: 'flex', flexDirection: 'row', alignItems:'center', justifyContent: 'space-between'}}>
                     <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -27,12 +75,17 @@ function Signin({navigation}) {
 
                     </View>
                     <View style = {{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-                        <Text style = {{color: '#E86969', fontSize: 15, fontWeight: 'medium'}}>Forgot Password?</Text>
+                        <Text style = {{color: 'white', fontSize: 15, fontWeight: 'medium'}}>Forgot Password?</Text>
                     </View>
                 </View>
-                <TouchableOpacity style = {styles.button} onPress = {() =>{navigation.navigate('Bottombar')}} >
+                {/* onPress = {() =>{navigation.navigate('Bottombar')}} */}
+                <TouchableOpacity style = {styles.button} onPress = {handleSignIn} >
                     <Text style = {{color: '#fff', fontSize: 16, fontWeight: 'bold'}}>Login</Text>
                 </TouchableOpacity>
+                {
+                    error &&
+                    <Text style = {{color: '#E86969', marginTop: 10}}>Invalid Email or Password</Text>
+                }
             </View>
             <View style= {{display:'flex', flexDirection:'row', alignItems: 'center'}}>
                 <Divider style = {{flex: 1}}/>
@@ -112,6 +165,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         borderColor: 'rgba(255,255,255, 1)',
         fontFamily: 'poppinsRegular',
+        color: 'white'
 
 
     },
